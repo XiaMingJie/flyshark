@@ -1,0 +1,3 @@
+aux_source_directory(. SERVICE_SRC)
+add_library(SERVICE_LIB STATIC ${SERVICE_SRC})
+target_link_libraries(SERVICE_LIB HTTP_LIB UTIL_LIB THREAD_POOL_LIB LOGGER_LIB TIMER_LIB)

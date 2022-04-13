@@ -1,0 +1,33 @@
+cmake_minimum_required(VERSION 3.16)
+project(flyshark)
+
+set(CMAKE_CXX_STANDARD 14)
+#set(CMAKE_CXX_FLAGS -O2)
+SET(CMAKE_BUILD_TYPE "Debug")
+SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g2 -ggdb")
+SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
+
+include_directories(http)
+include_directories(threadpool)
+include_directories(buffer)
+include_directories(util)
+include_directories(logger)
+include_directories(service)
+include_directories(timer)
+
+add_subdirectory(http)
+add_subdirectory(threadpool)
+add_subdirectory(buffer)
+add_subdirectory(util)
+add_subdirectory(logger)
+add_subdirectory(service)
+add_subdirectory(timer)
+
+add_executable(flyshark main.cc)
+target_link_libraries(flyshark HTTP_LIB THREAD_POOL_LIB BUFFER_LIB UTIL_LIB LOGGER_LIB SERVICE_LIB TIMER_LIB pthread)
+
+#add_executable(test test.cc)
+#target_link_libraries(test HTTP_LIB THREAD_POOL_LIB BUFFER_LIB UTIL_LIB LOGGER_LIB SERVICE_LIB TIMER_LIB pthread)
+
+add_executable(stress_test stress_test.cc)
+target_link_libraries(stress_test UTIL_LIB LOGGER_LIB pthread)
