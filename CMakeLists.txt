@@ -25,9 +25,3 @@ add_subdirectory(timer)
 
 add_executable(flyshark main.cc)
 target_link_libraries(flyshark HTTP_LIB THREAD_POOL_LIB BUFFER_LIB UTIL_LIB LOGGER_LIB SERVICE_LIB TIMER_LIB pthread)
-
-#add_executable(test test.cc)
-#target_link_libraries(test HTTP_LIB THREAD_POOL_LIB BUFFER_LIB UTIL_LIB LOGGER_LIB SERVICE_LIB TIMER_LIB pthread)
-
-add_executable(stress_test stress_test.cc)
-target_link_libraries(stress_test UTIL_LIB LOGGER_LIB pthread)
