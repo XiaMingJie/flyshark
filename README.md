@@ -1,5 +1,5 @@
 # flyshark
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;使用C++实现的简单的Web服务器框架，支持GET/POST请求，支持静态资源的访问和动态请求的处理。<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;使用C++实现的简单的Web服务器，支持GET/POST请求，支持静态资源的访问和动态请求的处理。<br>
 * 基于Reactor事件处理模式，使用线程池处理任务，能够快速响应HTTP请求。
 * 实现了高性能定时器，超时关闭空闲连接。
 * 使用mmap读取静态文件资源，减少对磁盘I/O操作，提高性能。
