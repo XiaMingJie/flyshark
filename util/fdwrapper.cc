@@ -6,7 +6,6 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <cstring>
-#include <csignal>
 #include "logger.h"
 
 namespace fdwrapper {
