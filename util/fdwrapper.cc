@@ -30,7 +30,7 @@ namespace fdwrapper {
             return -1;
         }
 
-        if ((bind(sockFd, (struct sockaddr *) &address, sizeof(address)) == -1) || (::listen(sockFd, 300) == -1)) {
+        if ((bind(sockFd, (struct sockaddr *) &address, sizeof(address)) == -1) || (::listen(sockFd, 4096) == -1)) {
             LOG_ERROR("%s\n", strerror(errno));
             close(sockFd);
             return -1;
