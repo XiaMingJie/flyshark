@@ -15,13 +15,13 @@ int main() {
     service.SetTimeOut(180);
 
     service.OnGet("/get/test", [](HttpRequest &request, HttpResponse &response) {
-        string json_res = R"({"method": "GET", "name": "flyshark", "sex": "male", "age": 1, "phone": "xxxxxxxxxxx"})";
+        string json_res = R"({"method": "GET", "url": "/get/test"})";
         response.SetContentType("application/json");
         response.SetBody(json_res);
     });
 
     service.OnPost("/post/test", [](HttpRequest &request, HttpResponse &response) {
-        string json_res = R"({"method": "POST", "name": "flyshark", "sex": "male", "age": 1, "phone": "xxxxxxxxxxx"})";
+        string json_res = R"({"method": "POST", "url": "/post/test"})";
         response.SetContentType("application/json");
         response.SetBody(json_res);
     });
