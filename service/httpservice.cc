@@ -24,7 +24,7 @@ namespace flyshark {
 
     HttpService::HttpService() : listenFd_(-1), timeslot_(120),
             epoller_(std::make_unique<Epoller>()),
-            threadPool_(std::make_unique<ThreadPool>(sysconf(_SC_NPROCESSORS_ONLN) * 2)),
+            threadPool_(std::make_unique<ThreadPool>(sysconf(_SC_NPROCESSORS_ONLN) * 4)),
             timer_(std::make_unique<Timer>()) {
 
         srcDir_ = getcwd(nullptr, 0);
