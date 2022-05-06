@@ -52,7 +52,6 @@ namespace flyshark {
         HttpResponse httpResponse;
 
         static Epoller *epoller;
-        static std::atomic<int> count;
 
         //根目录
         static const char *webroot;

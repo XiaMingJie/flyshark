@@ -9,10 +9,7 @@ using namespace std;
 using namespace flyshark;
 
 int main() {
-    HttpService service;
-
-    //超时关闭连接
-    service.SetTimeOut(180);
+    HttpService service(true);
 
     service.OnGet("/get/test", [](HttpRequest &request, HttpResponse &response) {
         string json_res = R"({"method": "GET", "url": "/get/test"})";

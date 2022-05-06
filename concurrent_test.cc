@@ -9,19 +9,14 @@
 using namespace std;
 
 int main(int argc, char *argv[]) {
-    if (argc < 3) {
-        printf("please input host and port.\n");
+    if (argc < 5) {
+        printf("please input [host] [port] [threadNum] [preThreadConnNum].\n");
         return 1;
     }
     const char *host = argv[1];
     int port = atoi(argv[2]);
-    int thread_number = 5;
-    int per_conn_number = 200;
-
-    struct sockaddr_in remote{};
-    remote.sin_family = AF_INET;
-    inet_pton(AF_INET, host, &remote.sin_addr.s_addr);
-    remote.sin_port = htons(port);
+    int thread_number = atoi(argv[3]);
+    int per_conn_number = atoi(argv[4]);
 
     vector<thread> threads;
 
@@ -30,7 +25,7 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < thread_number; ++i) {
         threads.emplace_back([&] {
             for (int j = 0; j < per_conn_number; ++j) {
-                int connfd = fdwrapper::connection(remote);
+                int connfd = fdwrapper::connect(host, port);
                 if (connfd < 0) continue;
             }
         });

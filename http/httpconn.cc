@@ -14,7 +14,6 @@ namespace flyshark {
     using std::function;
 
     Epoller *HttpConn::epoller = nullptr;
-    std::atomic<int> HttpConn::count;
     const char *HttpConn::webroot;
     std::unordered_map<std::string, RequestHandler> HttpConn::getCallBack_;
     std::unordered_map<std::string, RequestHandler> HttpConn::postCallBack_;
@@ -230,7 +229,6 @@ namespace flyshark {
             epoller->RemoveFd(fd_);
             fdwrapper::close(fd_);
             fd_ = -1;
-            count--;
         }
     }
 

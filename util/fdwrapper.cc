@@ -38,6 +38,14 @@ namespace fdwrapper {
         return sockFd;
     }
 
+    int listen(int port) {
+        struct sockaddr_in address {};
+        address.sin_family = AF_INET;
+        address.sin_addr.s_addr = htonl(INADDR_ANY);
+        address.sin_port = htons(port);
+        return listen(address);
+    }
+
     int connection(struct sockaddr_in &address) {
         int sockFd = socket(PF_INET, SOCK_STREAM, 0);
         if (sockFd < 0) return -1;
@@ -48,6 +56,14 @@ namespace fdwrapper {
         }
 
         return sockFd;
+    }
+
+    int connect(const char *host, int port) {
+        struct sockaddr_in address {};
+        address.sin_family = AF_INET;
+        inet_pton(AF_INET, host, &address.sin_addr.s_addr);
+        address.sin_port = htons(port);
+        return connection(address);
     }
 
     void close(int fd) {

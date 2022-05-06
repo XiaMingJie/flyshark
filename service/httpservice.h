@@ -18,7 +18,7 @@ namespace flyshark {
 
     class HttpService {
     public:
-        HttpService();
+        explicit HttpService(bool multiThread);
         ~HttpService();
 
         void OnGet(const std::string &url, RequestHandler &&call_back);
@@ -46,6 +46,8 @@ namespace flyshark {
         std::unique_ptr<ThreadPool> threadPool_;
         std::unordered_map<int, HttpConn> conns_;
         std::unique_ptr<Timer> timer_;
+
+        bool multiThread_;
     };
 }
 

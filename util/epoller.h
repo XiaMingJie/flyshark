@@ -7,6 +7,7 @@
 
 #include <sys/epoll.h>
 #include <unordered_map>
+#include <vector>
 
 namespace flyshark {
 
@@ -28,8 +29,15 @@ namespace flyshark {
 
         int Wait(struct epoll_event *events, int maxEvent, int timeout) const;
 
+        int Wait(int timeout);
+
+        int GetFd(int index) const;
+
+        uint32_t GetEvent(int index) const;
+
     private:
         int epollFd_;
+        std::vector<struct epoll_event> events_;
     };
 }
 

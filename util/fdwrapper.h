@@ -17,11 +17,13 @@ namespace fdwrapper {
      * 创建一个 Tcp socket 并监听
      * */
     extern int listen(struct sockaddr_in &address);
+    extern int listen(int port);
 
     /**
      * 创建一个 Tcp 连接
      * */
     extern int connection(struct sockaddr_in &address);
+    extern int connect(const char *host, int port);
 
     extern void close(int fd);
 };

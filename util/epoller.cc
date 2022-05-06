@@ -15,6 +15,7 @@ namespace flyshark {
     Epoller::Epoller() {
         epollFd_ = epoll_create(5);
         assert(epollFd_ >= 0);
+        events_.resize(100);
     }
 
     Epoller::~Epoller() {
@@ -23,6 +24,23 @@ namespace flyshark {
 
     int Epoller::Wait(struct epoll_event *events, int maxEvent, int timeout) const {
         return ::epoll_wait(epollFd_, events, maxEvent, timeout);
+    }
+
+    int Epoller::Wait(int timeout) {
+        int eventsSize = static_cast<int>(events_.size());
+        int eventNum = ::epoll_wait(epollFd_, events_.data(), static_cast<int>(events_.size()), timeout);
+        if (eventNum == eventsSize) {
+            events_.resize(eventNum * 2);
+        }
+        return eventNum;
+    }
+
+    int Epoller::GetFd(int index) const {
+        return events_.at(index).data.fd;
+    }
+
+    uint32_t Epoller::GetEvent(int index) const {
+        return events_.at(index).events;
     }
 
     void Epoller::AddReadEt(int fd, bool one_shot) const {

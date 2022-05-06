@@ -22,10 +22,10 @@ namespace flyshark {
         errno = save_errno;
     }
 
-    HttpService::HttpService() : listenFd_(-1), timeslot_(120),
+    HttpService::HttpService(bool multiThread) : listenFd_(-1), timeslot_(120),
             epoller_(std::make_unique<Epoller>()),
-            threadPool_(std::make_unique<ThreadPool>(sysconf(_SC_NPROCESSORS_ONLN) * 4)),
-            timer_(std::make_unique<Timer>()) {
+//            threadPool_(std::make_unique<ThreadPool>(sysconf(_SC_NPROCESSORS_ONLN) * 4)),
+            timer_(std::make_unique<Timer>()), multiThread_(multiThread) {
 
         srcDir_ = getcwd(nullptr, 0);
         assert(srcDir_);
@@ -33,10 +33,13 @@ namespace flyshark {
         HttpConn::webroot = srcDir_;
 
         HttpConn::epoller = epoller_.get();
-        HttpConn::count = 0;
         assert(socketpair(PF_UNIX, SOCK_STREAM, 0, pipe_fd) != -1);
         fdwrapper::set_nonblocking(pipe_fd[1]);
         epoller_->AddReadEt(pipe_fd[0], false);
+
+        if (multiThread_) {
+            threadPool_ = std::make_unique<ThreadPool>(sysconf(_SC_NPROCESSORS_ONLN) * 4);
+        }
     }
 
     void HttpService::Bind(int port) {
@@ -68,32 +71,28 @@ namespace flyshark {
         HttpConn::AddPostHandler(url, std::forward<decltype(call_back)>(call_back));
     }
 
-    void show_logo();
-
     void HttpService::Loop() {
-        show_logo();
 
         //注册信号处理函数
         signaler::register_handler(SIGINT, sig_notify);
         signaler::register_handler(SIGTERM, sig_notify);
         signaler::register_handler(SIGALRM, sig_notify);
 
-        alarm(timeslot_);
+//        alarm(timeslot_);
 
-        struct epoll_event events[MAX_EVENT_NUMBER];
         bool stop = false;
         bool timeout = false;
 
         while (!stop) {
-            int event_num = epoller_->Wait(events, MAX_EVENT_NUMBER, -1);
+            int event_num = epoller_->Wait(-1);
             if (event_num == -1 && errno != EINTR) {
                 LOG_ERROR("epoll failure.");
                 break;
             }
 
             for (int i = 0; i < event_num; ++i) {
-                int io_fd = events[i].data.fd;
-                uint32_t io_event = events[i].events;
+                int io_fd = epoller_->GetFd(i);
+                uint32_t io_event = epoller_->GetEvent(i);
 
                 if (io_fd == listenFd_) {
                     Accept_();
@@ -122,14 +121,23 @@ namespace flyshark {
                     timer_->Remove(io_fd);
                 } else if (io_event & EPOLLIN) {
                     timer_->Update(io_fd, timeslot_);
-                    threadPool_->Post([this, fd = io_fd] {
-                        this->conns_[fd].Process(OP_TYPE::READ);
-                    });
+                    if (multiThread_) {
+                        threadPool_->Post([this, fd = io_fd] {
+                            this->conns_[fd].Process(OP_TYPE::READ);
+                        });
+                    } else {
+                        conns_[io_fd].Process(OP_TYPE::READ);
+                    }
                 } else if (io_event & EPOLLOUT) {
                     timer_->Update(io_fd, timeslot_);
-                    threadPool_->Post([this, fd = io_fd] {
-                        this->conns_[fd].Process(OP_TYPE::WRITE);
-                    });
+                    if (multiThread_) {
+                        threadPool_->Post([this, fd = io_fd] {
+                            this->conns_[fd].Process(OP_TYPE::WRITE);
+                        });
+                    } else {
+                        conns_[io_fd].Process(OP_TYPE::WRITE);
+                    }
+
                 } else {}
             }
 
@@ -156,30 +164,6 @@ namespace flyshark {
                 this->conns_[fd].CloseConn();
             });
             conns_[conn_fd].Init(conn_fd);
-            HttpConn::count++;
-            LOG_INFO("connection number: %d", HttpConn::count.load());
-        }
-    }
-
-    void show_logo() {
-        if (Logger::open) {
-            LOG_INFO("  ______ _        _____ _                _    ");
-            LOG_INFO(" |  ____| |      / ____| |              | |   ");
-            LOG_INFO(" | |__  | |_   _| (___ | |__   __ _ _ __| | __");
-            LOG_INFO(" |  __| | | | | |\\___ \\| '_ \\ / _` | '__| |/ /");
-            LOG_INFO(" | |    | | |_| |____) | | | | (_| | |  |   < ");
-            LOG_INFO(" |_|    |_|\\__, |_____/|_| |_|\\__,_|_|  |_|\\_\\");
-            LOG_INFO("            __/ |                             ");
-            LOG_INFO("           |___/                              ");
-        } else {
-            printf("  ______ _        _____ _                _    \n");
-            printf(" |  ____| |      / ____| |              | |   \n");
-            printf(" | |__  | |_   _| (___ | |__   __ _ _ __| | __\n");
-            printf(" |  __| | | | | |\\___ \\| '_ \\ / _` | '__| |/ /\n");
-            printf(" | |    | | |_| |____) | | | | (_| | |  |   < \n");
-            printf(" |_|    |_|\\__, |_____/|_| |_|\\__,_|_|  |_|\\_\\\n");
-            printf("            __/ |                             \n");
-            printf("           |___/                              \n");
         }
     }
 
